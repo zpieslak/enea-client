@@ -1,10 +1,12 @@
 # Enea Client
 
+![test workflow](https://github.com/zpieslak/enea-client/actions/workflows/ci.yml/badge.svg)
+
 A standalone Python script for downloading hourly energy consumption data from the Enea customer portal (ebok.enea.pl). This tool automates the process of logging into the Enea portal, retrieving hourly energy consumption data for a given month in CSV format, and optionally running post-processing scripts (which can be used later, for example, to import data into Home Assistant or other systems).
 
 ## Requirements
 
-- Python 3.8 or higher, no external packages needed - only standard library modules are used.
+- Python 3.9 or higher, no external packages needed - only standard library modules are used.
 - Valid Enea ebok customer account credentials and an energy meter that supports real-time data reporting (check if you have data available at https://ebok.enea.pl/meter/summaryBalancingChart).
 
 ## Usage
@@ -41,7 +43,8 @@ This example uses the Chrome browser:
 1. Log into your Enea customer portal and navigate to https://ebok.enea.pl/meter/summaryBalancingChart.
 2. Open browser developer tools and go to the Network tab.
 3. Choose a day with available data and click to download CSV data.
-4. The `pointOfDeliveryId` parameter in the request URL is your POD GUID (see screenshot below).
+4. Find request named `csv` in the Network tab.
+5. The `pointOfDeliveryId` parameter in the request URL is your POD GUID (see screenshot below).
 
 [![Finding POD GUID](docs/pod_guid_screenshot.png)](docs/pod_guid_screenshot.png)
 
@@ -67,7 +70,7 @@ Consider using environment variables instead of command-line arguments for sensi
 
 Download data automatically every day, then process the data with custom scripts and import it into your Home Assistant energy tab.
 
-1. Configure custom Home Assistant sensors for export and import energy data. Since data is available with a few days' delay, a custom integration is needed to import data. See [Home Assistant Statistics Integration](https://github.com/klausj1/homeassistant-statistics) for details. Example:
+1. Configure custom Home Assistant sensors for export and import energy data. Since data is available with a few days delay, a custom integration is needed to import data. See [Home Assistant Statistics Integration](https://github.com/klausj1/homeassistant-statistics) for details. Example:
 
     a. Create template sensors in your `configuration.yaml`:
 
@@ -91,7 +94,7 @@ Download data automatically every day, then process the data with custom scripts
 
     b. Import one point with value 0 for each sensor to initialize it. The date should be the start of the statistics period. All future data will append to this initial value.
 
-2. Create a post-processing script that processes the downloaded CSV files and imports them into your home assistant or other systems. See `scripts/post_process_script.sh` for an example.
+2. Create a post-processing script that processes the downloaded CSV files and imports them into your home assistant installation. See `scripts/post_process_script.sh` for an example.
 3. Create a systemd service and timer to run the script monthly. See `scripts/enea_client.service` and `scripts/enea_client.timer` for examples.
 
 ## Development

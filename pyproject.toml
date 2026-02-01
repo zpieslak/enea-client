@@ -1,11 +1,15 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
 [project]
 name = "enea-client"
 dynamic = ["version"]
-description = "Python client for Enea"
+description = "Standalone Python tool for downloading hourly energy consumption data from Enea customer portal (ebok.enea.pl)"
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [{name = "Zbigniew Pieślak", email = "zpieslak@gmail.com"}]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: MIT License",
@@ -21,8 +25,9 @@ test = [
   "ruff>=0.9.0"
 ]
 
-[tool.setuptools]
-packages = ["enea_client"]
+[project.urls]
+homepage = "https://github.com/zpieslak/enea-client"
+issues = "https://github.com/zpieslak/enea-client/issues"
 
 [tool.coverage.report]
 exclude_also = [
@@ -33,6 +38,17 @@ exclude_also = [
 omit = [
   "tests/*"
 ]
+
+[tool.hatch.build]
+exclude = [
+  ".*",
+  "docs/*",
+  "scripts/*",
+  "tests/*"
+]
+
+[tool.hatch.version]
+source = "vcs"
 
 [tool.mypy]
 strict = true
