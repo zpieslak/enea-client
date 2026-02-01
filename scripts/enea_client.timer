@@ -1,0 +1,9 @@
+[Unit]
+Description=Run enea_client daily at 02:00
+
+[Timer]
+OnCalendar=*-*-* 02:03:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

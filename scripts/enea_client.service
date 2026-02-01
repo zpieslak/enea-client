@@ -1,0 +1,9 @@
+[Unit]
+Description=Run enea_client import
+
+[Service]
+Type=oneshot
+EnvironmentFile=/home/zbigniew/bin/enea-client/.env
+WorkingDirectory=/home/zbigniew/bin/enea-client
+
+ExecStart=/bin/bash -c 'CURRENT=$$(date +%%m.%%Y); PREVIOUS=$$(date -d "last month" +%%m.%%Y); exec /usr/bin/python -m enea_client --dates="$${PREVIOUS},$${CURRENT}" --post-process-script=scripts/post_process_script.sh'
