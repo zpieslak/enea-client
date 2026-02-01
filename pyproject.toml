@@ -1,0 +1,49 @@
+[project]
+name = "enea-client"
+dynamic = ["version"]
+description = "Python client for Enea"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [{name = "Zbigniew Pieślak", email = "zpieslak@gmail.com"}]
+requires-python = ">=3.8"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+test = [
+  "coverage>=7.0",
+  "mypy>=1.0",
+  "pytest>=8.0",
+  "pytest_httpserver>=1.0",
+  "ruff>=0.9.0"
+]
+
+[tool.setuptools]
+packages = ["enea_client"]
+
+[tool.coverage.report]
+exclude_also = [
+  "if TYPE_CHECKING:"
+]
+
+[tool.coverage.run]
+omit = [
+  "tests/*"
+]
+
+[tool.mypy]
+strict = true
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+flake8-builtins.builtins-strict-checking = false
+ignore = ["D", "PT", "TRY400"]
+select = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["PLR0913", "PLR2004", "S101"]
