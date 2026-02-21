@@ -4,12 +4,22 @@
 
 A standalone Python script for downloading hourly energy consumption data from the Enea customer portal (ebok.enea.pl). This tool automates the process of logging into the Enea portal, retrieving hourly energy consumption data for a given month in CSV format, and optionally running post-processing scripts (which can be used later, for example, to import data into Home Assistant or other systems).
 
+The story behind this project, covering both the motivation and the process, is described in this [blog post](https://codegyver.com/2026/02/16/enea-client-hourly-energy-data/).
+
 ## Requirements
 
 - Python 3.9 or higher, no external packages needed - only standard library modules are used.
 - Valid Enea ebok customer account credentials and an energy meter that supports real-time data reporting (check if you have data available at https://ebok.enea.pl/meter/summaryBalancingChart).
 
 ## Usage
+
+### Installation
+
+Package is available on PyPI, so you can install it with pip:
+
+```bash
+pip install enea-client
+```
 
 ### Basic Usage
 
@@ -94,8 +104,17 @@ Download data automatically every day, then process the data with custom scripts
 
     b. Import one point with value 0 for each sensor to initialize it. The date should be the start of the statistics period. All future data will append to this initial value.
 
+    Example of import CSV file in the format expected by the Home Assistant Statistics Integration:
+
+    ```csv
+    statistic_id,unit,start,delta
+    sensor.grid_import_energy,kWh,2026-01-01 00:00,0.618
+    sensor.grid_export_energy,kWh,2026-01-01 00:00,0
+    sensor.grid_import_energy,kWh,2026-01-01 01:00,0.581
+    sensor.grid_export_energy,kWh,2026-01-01 01:00,0
+
 2. Create a post-processing script that processes the downloaded CSV files and imports them into your home assistant installation. See `scripts/post_process_script.sh` for an example.
-3. Create a systemd service and timer to run the script monthly. See `scripts/enea_client.service` and `scripts/enea_client.timer` for examples.
+3. Create a systemd service and timer to run the script daily. See `scripts/enea_client.service` and `scripts/enea_client.timer` for examples.
 
 ## Development
 
