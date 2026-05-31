@@ -15,4 +15,9 @@ class Config:
 
     connection_timeout: int = 60
     enea_url: str = "https://ebok.enea.pl"
+    enea_user_agent: str = (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/148.0.0.0 Safari/537.36"
+    )
     enea_timezone: ZoneInfo = field(default_factory=lambda: ZoneInfo("Europe/Warsaw"))

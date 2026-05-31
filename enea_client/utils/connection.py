@@ -3,6 +3,7 @@ from __future__ import annotations
 import http.client as http_client
 import logging
 from contextlib import contextmanager
+from http.cookies import SimpleCookie
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
@@ -33,3 +34,18 @@ def open_connection(url: str, timeout: int) -> Generator[http_client.HTTPConnect
         yield connection
     finally:
         connection.close()
+
+
+def get_cookie_header(cookies_list: list[str] | None, cookie_name: str) -> str | None:
+    cookie_jar = SimpleCookie()
+
+    if cookies_list is None:
+        return None
+
+    for cookie in cookies_list:
+        cookie_jar.load(cookie)
+
+    if cookie_name not in cookie_jar:
+        return None
+
+    return cookie_jar[cookie_name].OutputString(attrs=[])

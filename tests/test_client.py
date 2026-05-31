@@ -19,7 +19,7 @@ def test_client_aithenticate_success(httpserver: HTTPServer, config: Config) -> 
         '<input type="hidden" name="token" value="token-123">',
         status=HTTPStatus.OK,
         headers={
-            "Set-Cookie": "SESSION=unsigned; Path=/; HttpOnly",
+            "Set-Cookie": "EBOK_SESSION=unsigned; Path=/; HttpOnly",
             "Content-Type": "text/html",
         },
     )
@@ -28,14 +28,19 @@ def test_client_aithenticate_success(httpserver: HTTPServer, config: Config) -> 
         "",
         status=HTTPStatus.FOUND,
         headers={
-            "Set-Cookie": "SESSION=signed; Path=/; HttpOnly",
+            "Set-Cookie": "EBOK_SESSION=signed; Path=/; HttpOnly",
             "Location": "/",
         },
     )
 
+    httpserver.expect_request("/dashboard", method="GET").respond_with_data(
+        "",
+        status=HTTPStatus.OK,
+    )
+
     client = Client(config)
     assert client.authenticate() is True
-    assert client.signed_cookie == "SESSION=signed; Path=/; HttpOnly"
+    assert client.signed_cookie == "EBOK_SESSION=signed"
 
 def test_client_authenticate_session_none(config: Config, httpserver: HTTPServer) -> None:
     config.enea_url = httpserver.url_for("")
@@ -56,7 +61,7 @@ def test_client_authenticate_signed_cookie_none(config: Config, httpserver: HTTP
         '<input type="hidden" name="token" value="token-123">',
         status=HTTPStatus.OK,
         headers={
-            "Set-Cookie": "SESSION=unsigned; Path=/; HttpOnly",
+            "Set-Cookie": "EBOK_SESSION=unsigned; Path=/; HttpOnly",
             "Content-Type": "text/html",
         },
     )
@@ -69,6 +74,40 @@ def test_client_authenticate_signed_cookie_none(config: Config, httpserver: HTTP
     client = Client(config)
     assert client.authenticate() is False
     assert client.signed_cookie == ""
+
+def test_client_authenticate_signed_cookie_not_found(
+    config: Config,
+    httpserver: HTTPServer,
+    caplog: LogCaptureFixture,
+) -> None:
+    config.enea_url = httpserver.url_for("")
+
+    httpserver.expect_request("/logowanie", method="GET").respond_with_data(
+        '<input type="hidden" name="token" value="token-123">',
+        status=HTTPStatus.OK,
+        headers={
+            "Set-Cookie": "EBOK_SESSION=unsigned; Path=/; HttpOnly",
+            "Content-Type": "text/html",
+        },
+    )
+
+    httpserver.expect_request("/logowanie", method="POST").respond_with_data(
+        "",
+        status=HTTPStatus.FOUND,
+        headers={
+            "Set-Cookie": "OTHER_SESSION=signed; Path=/; HttpOnly",
+            "Location": "/",
+        },
+    )
+
+    client = Client(config)
+
+    with caplog.at_level(logging.ERROR):
+        result = client.authenticate()
+
+    assert result is False
+    assert client.signed_cookie == ""
+    assert "Error: EBOK_SESSION cookie not found" in caplog.text
 
 def test_client_authenticate_no_cookie(config: Config, httpserver: HTTPServer, caplog: LogCaptureFixture) -> None:
     config.enea_url = httpserver.url_for("")
@@ -88,7 +127,7 @@ def test_client_authenticate_no_cookie(config: Config, httpserver: HTTPServer, c
 
     assert result is False
     assert client.signed_cookie == ""
-    assert "Error: No cookie" in caplog.text
+    assert "Error: EBOK_SESSION cookie not found" in caplog.text
 
 def test_client_get_data_success(config: Config, httpserver: HTTPServer) -> None:
     data = (
