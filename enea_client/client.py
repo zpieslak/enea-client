@@ -7,7 +7,7 @@ import urllib.parse
 from http import HTTPStatus
 from typing import TYPE_CHECKING, TypedDict
 
-from enea_client.utils.connection import open_connection
+from enea_client.utils.connection import get_cookie_header, open_connection
 
 if TYPE_CHECKING:
     from enea_client.config import Config
@@ -21,6 +21,7 @@ class Response(TypedDict, total=False):
 class Client:
     def __init__(self, config: Config) -> None:
         self.config = config
+        self.session_cookie_name = "EBOK_SESSION"
         self.signed_cookie: str = ""
 
     def authenticate(self) -> bool:
@@ -57,6 +58,7 @@ class Client:
                 headers={
                     "Content-type": "application/x-www-form-urlencoded",
                     "Cookie": self.signed_cookie,
+                    "User-Agent": self.config.enea_user_agent,
                 },
             )
 
@@ -84,16 +86,18 @@ class Client:
                 logger.error("Error: status - %s, reason - %s", response.status, response.reason)
                 return None
 
-            cookie = response.getheader("Set-Cookie")
-
-            if cookie is None:
-                logger.error("Error: No cookie")
+            session_cookie = get_cookie_header(
+                response.headers.get_all("Set-Cookie"),
+                self.session_cookie_name,
+            )
+            if session_cookie is None:
+                logger.error("Error: %s cookie not found", self.session_cookie_name)
                 return None
 
             body = response.read().decode()
             token = re.findall(r'name="token" value="([^"]+)"', body)[0]
 
-            return cookie, token
+            return session_cookie, token
 
     def _sign_session(self, cookie: str, token: str) -> str | None:
         with open_connection(self.config.enea_url, self.config.connection_timeout) as connection:
@@ -116,4 +120,21 @@ class Client:
                 logger.error("Error: status - %s, reason - %s", response.status, response.reason)
                 return None
 
-            return response.getheader("Set-Cookie")
+            session_cookie = get_cookie_header(
+                response.headers.get_all("Set-Cookie"),
+                self.session_cookie_name,
+            )
+            if session_cookie is None:
+                logger.error("Error: %s cookie not found", self.session_cookie_name)
+                return None
+
+            connection.request(
+                "GET",
+                "/dashboard",
+                headers={
+                    "Cookie": session_cookie,
+                    "User-Agent": self.config.enea_user_agent,
+                },
+            )
+
+            return session_cookie
