@@ -53,35 +53,49 @@ def read_output(env: dict[str, str]) -> str:
     [
         (
             '\x00"=""2025-09-01 00:59"""\x00;"0,507";"0";"0,507";"0"\n',
-            "sensor.grid_import_energy,kWh,2025-09-01 00:00,0.507\n"
-            "sensor.grid_export_energy,kWh,2025-09-01 00:00,0\n",
+            (
+                "sensor.grid_import_energy,kWh,2025-09-01 00:00,0.507\n"
+                "sensor.grid_export_energy,kWh,2025-09-01 00:00,0\n"
+            ),
         ),
         (
             '\x00"=""2025-09-01 01:59"""\x00;"0";"12,34";"0";"12,34"',
-            "sensor.grid_import_energy,kWh,2025-09-01 01:00,0\n"
-            "sensor.grid_export_energy,kWh,2025-09-01 01:00,12.34\n",
+            (
+                "sensor.grid_import_energy,kWh,2025-09-01 01:00,0\n"
+                "sensor.grid_export_energy,kWh,2025-09-01 01:00,12.34\n"
+            ),
         ),
         (
-            'some line with "---" that should be removed\n'
-            '"2025-09-01 00:59";"0,507";"0";"0,507";"0"\n'
-            '"2025-09-01 01:59";"---";"0";"---";"0"',
-            "sensor.grid_import_energy,kWh,2025-09-01 00:00,0.507\n"
-            "sensor.grid_export_energy,kWh,2025-09-01 00:00,0\n",
+            (
+                'some line with "---" that should be removed\n'
+                '"2025-09-01 00:59";"0,507";"0";"0,507";"0"\n'
+                '"2025-09-01 01:59";"---";"0";"---";"0"'
+            ),
+            (
+                "sensor.grid_import_energy,kWh,2025-09-01 00:00,0.507\n"
+                "sensor.grid_export_energy,kWh,2025-09-01 00:00,0\n"
+            ),
         ),
         (
             '\x00"=""2025-09-01 00:59"""\x00;"0,507";"0";"0,507";"0"\r\n',
-            "sensor.grid_import_energy,kWh,2025-09-01 00:00,0.507\n"
-            "sensor.grid_export_energy,kWh,2025-09-01 00:00,0\r\n",
+            (
+                "sensor.grid_import_energy,kWh,2025-09-01 00:00,0.507\n"
+                "sensor.grid_export_energy,kWh,2025-09-01 00:00,0\r\n"
+            ),
         ),
         (
             '"2025-09-01 00:59";"0.507";"0";"0.507";"0"\n',
-            "sensor.grid_import_energy,kWh,2025-09-01 00:00,0.507\n"
-            "sensor.grid_export_energy,kWh,2025-09-01 00:00,0\n",
+            (
+                "sensor.grid_import_energy,kWh,2025-09-01 00:00,0.507\n"
+                "sensor.grid_export_energy,kWh,2025-09-01 00:00,0\n"
+            ),
         ),
         (
             '\x00"=""2025-09-01 00:59"""\x00;"0";"0";"=""1,23""";"=""4,56"""\n',
-            "sensor.grid_import_energy,kWh,2025-09-01 00:00,1.23\n"
-            "sensor.grid_export_energy,kWh,2025-09-01 00:00,4.56\n",
+            (
+                "sensor.grid_import_energy,kWh,2025-09-01 00:00,1.23\n"
+                "sensor.grid_export_energy,kWh,2025-09-01 00:00,4.56\n"
+            ),
         ),
         ('"2025-09-01 00:59";"---";"---";"---";"---"\n', ""),
         ("", ""),

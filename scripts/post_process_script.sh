@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+script_dir="$(dirname -- "${BASH_SOURCE[0]}")"
 inputs=("$@")
 output_dir="$ENEA_CLIENT_POST_PROCESS_HOME_ASSISTANT_CONFIG_DIR"
 output_file="$ENEA_CLIENT_POST_PROCESS_OUTPUT_PATH"
