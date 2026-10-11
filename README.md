@@ -23,7 +23,7 @@ pip install enea-client
 
 ### Basic Usage
 
-Download specific months in CSV format. Files are sanitized and saved to the specified output directory. Optionally, a post-processing script can be specified.
+Download specific months in CSV format. Raw CSV data is saved to the specified output directory without sanitization. Optionally, a post-processing script can sanitize and transform the downloaded files.
 
 ```bash
 python -m enea_client \
@@ -60,17 +60,25 @@ This example uses the Chrome browser:
 
 ### Output Format
 
-The script saves data for each specified month in a separate CSV file in the output directory. An example output file for January 2026 would look like this:
+The script saves the CSV string returned by the Enea API for each specified month in a separate file in the output directory. It does not remove placeholder rows, NUL bytes, or Excel-style wrappers, and decimal values retain their commas. An example output file for January 2026 would look like this (actual NUL bytes are shown as `\0` for readability):
 
     Data;"Wolumen energii elektrycznej pobranej z sieci przed bilansowaniem godzinowym";"Wolumen energii elektrycznej oddanej do sieci przed bilansowaniem godzinowym";"Wolumen energii elektrycznej pobranej z sieci po bilansowaniu godzinowym";"Wolumen energii elektrycznej oddanej do sieci po bilansowaniu godzinowym"
-    "2026-01-01 00:59";"0.123";"0";"0.123";"0"
-    "2026-01-01 01:59";"0.124";"0";"0.124";"0"
+    \0"=""2026-01-01 00:59"""\0;"0,123";"0";"0,123";"0"
+    \0"=""2026-01-01 01:59"""\0;"0,124";"0";"0,124";"0"
 
 ### Post-processing Scripts
 
-If you specify a `--post-process-script`, it will be executed after all data has been downloaded. The script receives the paths of all generated CSV files as command-line arguments.
+If you specify a `--post-process-script`, it will be executed after all data has been downloaded. The script receives the paths of all raw CSV files as command-line arguments. Without a post-processing script, no sanitization takes place.
 
-See example post-processing script `post_process_script.sh` in the `scripts/` directory for reference.
+The example [`scripts/post_process_script.sh`](scripts/post_process_script.sh) removes NUL bytes, then uses [`scripts/enea_to_home_assistant.awk`](scripts/enea_to_home_assistant.awk) to drop rows containing `"---"`, remove Excel-style wrappers, and convert commas between digits to decimal points before generating a Home Assistant statistics CSV. Downloaded input files remain unchanged. Keep both files together in the same directory when deploying the example; the Bash script locates the converter relative to itself, regardless of the working directory.
+
+The example requires Bash, `tr`, `awk`, GNU-compatible `sed` (for `sed -i`), and `curl`. Set these environment variables:
+
+- `ENEA_CLIENT_POST_PROCESS_HOME_ASSISTANT_CONFIG_DIR`: Home Assistant configuration directory where the processed CSV will be written.
+- `ENEA_CLIENT_POST_PROCESS_OUTPUT_PATH`: Output filename relative to that directory, also sent to Home Assistant for import.
+- `ENEA_CLIENT_POST_PROCESS_HOME_ASSISTANT_TOKEN`: Home Assistant access token.
+
+The example imports into Home Assistant at `http://localhost:8123`. The scripts are provided in this repository, not included in the Python package.
 
 ### Security Considerations
 
