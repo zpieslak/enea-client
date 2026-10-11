@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -euo pipefail
+
+script_dir="$(dirname -- "${BASH_SOURCE[0]}")"
 inputs=("$@")
 output_dir="$ENEA_CLIENT_POST_PROCESS_HOME_ASSISTANT_CONFIG_DIR"
 output_file="$ENEA_CLIENT_POST_PROCESS_OUTPUT_PATH"
@@ -7,24 +10,10 @@ output_file="$ENEA_CLIENT_POST_PROCESS_OUTPUT_PATH"
 # Clear the output file and write header once
 echo "statistic_id,unit,start,delta" > "$output_dir/$output_file"
 
-# Prepare the CSV file for Home Assistant import
+# Sanitize raw CSV data without modifying the downloaded files, then convert it.
 for input in "${inputs[@]}"; do
-  awk -F';' '
-  BEGIN {
-    OFS=","
-  }
-
-  NR==1 { next }
-
-  {
-    gsub(/"/, "")
-    split($1, a, /[- :]/)
-    start = a[1] "-" a[2] "-" a[3] " " a[4] ":00"
-
-    print "sensor.grid_import_energy","kWh",start,$4
-    print "sensor.grid_export_energy","kWh",start,$5
-  }
-  ' "$input" >> "$output_dir/$output_file"
+  tr -d '\000' < "$input" \
+    | awk -f "$script_dir/enea_to_home_assistant.awk" >> "$output_dir/$output_file"
 done
 
 # Adjust the DST-overlap timestamp in the generated CSV before import.

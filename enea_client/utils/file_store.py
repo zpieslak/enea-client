@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class FileStore:
     @staticmethod
-    def call(config: Config, date: str, data: str) -> None | Path:
+    def call(config: Config, date: str, data: str) -> Path | None:
         output_file_path = Path(f"{config.output_dir}/{date}.csv")
 
         logger.info("Saving file to: %s", output_file_path)

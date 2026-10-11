@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 from enea_client.client import Client
 from enea_client.utils.file_store import FileStore
-from enea_client.utils.sanitizer import Sanitizer
 
 if TYPE_CHECKING:
     from enea_client.config import Config
@@ -33,9 +32,7 @@ class App:
                 logger.error("Failed to retrieve data")
                 return
 
-            sanitized_data = Sanitizer.call(data)
-
-            file_path = FileStore.call(self.config, date, sanitized_data)
+            file_path = FileStore.call(self.config, date, data)
 
             file_paths.append(file_path)
 
